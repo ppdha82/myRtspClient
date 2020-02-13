@@ -122,12 +122,12 @@ class RtspClient
          *  because the response will be handled in callback function when getting rtp packets(refer to: SetRtspCmdClbk), and 'rtp_over_tcp' will be ignored.
 		 *  YOU MUST SET THE CALLBACK, OTHERWITH IT WILL BLOCKED WHEN GETTING MEDIA DATA
 		 * */
-		ErrorType DoSETUP(MediaSession * media_session, bool rtp_over_tcp = false, bool http_tunnel_no_response = false);
+		ErrorType DoSETUP(MediaSession * media_session, bool rtp_over_tcp = true, bool http_tunnel_no_response = false);
 
 		/* Example: DoSETUP("video");
 		 * To setup the first video session in SDP
 		 * */
-		ErrorType DoSETUP(string media_type, bool rtp_over_tcp = false);
+		ErrorType DoSETUP(string media_type, bool rtp_over_tcp = true);
 
 		/* To play all of the media sessions in SDP */
 		ErrorType DoPLAY();
@@ -277,6 +277,7 @@ class RtspClient
 		void SetDestroiedClbk(string media_type, DESTROIED_CLBK clbk);
 		void SetAudioByeFromServerClbk(DESTROIED_CLBK clbk);
 		void SetVideoByeFromServerClbk(DESTROIED_CLBK clbk);
+		void SetMetadataByeFromServerClbk(DESTROIED_CLBK clbk);
 
 		int GetSessionTimeout(string media_type);
 		int GetSessionTimeout(MediaSession * media_session);
@@ -346,6 +347,7 @@ class RtspClient
 		string Nonce;
 		DESTROIED_CLBK ByeFromServerAudioClbk;
 		DESTROIED_CLBK ByeFromServerVideoClbk;
+		DESTROIED_CLBK ByeFromServerMetadataClbk;
 		int Timeout;
 
         /* Especially for H264/H265 */

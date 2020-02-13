@@ -151,6 +151,7 @@ int MediaSession::MediaInfoCheck()
 			printf("WARNING: invalid PayloadType\n");
 			return -1;
 		}
+		printf ("payload type = %d\n", *it);
 	}	
 	if(TimeRate <= 0) {
 		TimeRate = PT2TimeRateMap[*(PayloadType.begin())]; // FIXME: only use the first PayloadType

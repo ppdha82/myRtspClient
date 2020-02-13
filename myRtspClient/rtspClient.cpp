@@ -88,6 +88,7 @@ RtspClient::RtspClient():
 
 	ByeFromServerAudioClbk = NULL;
 	ByeFromServerVideoClbk = NULL;
+	ByeFromServerMetadataClbk = NULL;
 
 	/* Temporary only FU_A supported */
 	// NALUType = new FU_A;
@@ -123,6 +124,7 @@ RtspClient::RtspClient(string uri):
 
 	ByeFromServerAudioClbk = NULL;
 	ByeFromServerVideoClbk = NULL;
+	ByeFromServerMetadataClbk = NULL;
 
 	/* Temporary only FU_A supported */
 	// NALUType = new FU_A;
@@ -493,7 +495,7 @@ ErrorType RtspClient::DoSETUP()
 	ErrorType ErrAll = RTSP_NO_ERROR;
 
 	for(map<string, MediaSession *>::iterator it = MediaSessionMap->begin(); it != MediaSessionMap->end(); it++) {
-		Err = DoSETUP(it->second, false);
+		Err = DoSETUP(it->second, true);
 		if(RTSP_NO_ERROR == ErrAll) ErrAll = Err; // Remeber the first error
 		printf("Setup Session %s: %s\n", it->first.c_str(), ParseError(Err).c_str());
 	}
@@ -590,6 +592,7 @@ ErrorType RtspClient::DoSETUP(MediaSession * media_session, bool rtp_over_tcp, b
     }
 	SetDestroiedClbk("audio", ByeFromServerAudioClbk);
 	SetDestroiedClbk("video", ByeFromServerVideoClbk);
+	SetDestroiedClbk("metadata", ByeFromServerMetadataClbk);
 
 	// media_session->RTSPSockfd = Sockfd;
 	// close(Sockfd);
@@ -665,6 +668,7 @@ ErrorType RtspClient::DoPLAY(MediaSession * media_session, float * scale, float 
 	}
 	Msg << "CSeq: " << ++RtspCSeq << "\r\n";
 	Msg << "Session: " << media_session->SessionID << "\r\n";
+	printf ("[%s:%d] Session = %s (%s)\n", __FILE__, __LINE__, media_session->SessionID.c_str(), media_session->MediaType.c_str());
 	if(Realm.length() > 0 && Nonce.length() > 0) {
         /* digest auth */
 		string RealmTmp = Realm;
@@ -714,7 +718,10 @@ ErrorType RtspClient::DoPLAY(string media_type, float * scale, float * start_tim
 	bool IgnoreCase = true;
 
 	for(it = MediaSessionMap->begin(); it != MediaSessionMap->end(); it++) {
-		if(Regex.Regex(it->first.c_str(), media_type.c_str(), IgnoreCase)) break;
+		if(Regex.Regex(it->first.c_str(), media_type.c_str(), IgnoreCase)) {
+			printf ("[%s:%d] first = %s\n", __FILE__, __LINE__, it->first.c_str());
+			break;
+		}
 	}
 
 	if(it != MediaSessionMap->end()) {
@@ -1758,6 +1765,12 @@ void RtspClient::SetVideoByeFromServerClbk(DESTROIED_CLBK clbk)
 {
 	ByeFromServerVideoClbk = clbk;
 	SetDestroiedClbk("video", clbk);
+}
+
+void RtspClient::SetMetadataByeFromServerClbk(DESTROIED_CLBK clbk)
+{
+	ByeFromServerMetadataClbk = clbk;
+	SetDestroiedClbk("metadata", clbk);
 }
 
 int RtspClient::GetSessionTimeout(string media_type)

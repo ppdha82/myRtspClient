@@ -162,6 +162,9 @@ uint8_t * MyRTPTCPSession::GetMyRTPData(uint8_t * data_buf, size_t * size, unsig
 		size_t PacketSize = 0;
 		uint8_t * Packet = NULL;
 		Packet = pack->GetPayloadData();
+		if (pack->GetPayloadType() == 98) {
+			printf ("[%s:%d] payload_type = %d\n", __FILE__, __LINE__, pack->GetPayloadType());
+		}
 		PacketSize = pack->GetPayloadLength();
 		// printf("DEBUG: get packet: %d\n", PacketSize);
 		//for(int i = 0; i < PacketSize; i++) {
@@ -236,6 +239,9 @@ uint8_t * MyRTPTCPSession::GetMyRTPPacket(uint8_t * packet_buf, size_t * size, u
 		uint8_t * Packet = NULL;
 		Packet = pack->GetPacketData();
 		PacketSize = pack->GetPacketLength();
+		if (pack->GetPayloadType() == 98) {
+			printf ("[%s:%d] payload_type = %d\n", __FILE__, __LINE__, pack->GetPayloadType());
+		}
 		// printf("packet length: %lu\n", PacketSize);
 
 		*size = PacketSize;

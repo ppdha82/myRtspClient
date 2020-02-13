@@ -16,6 +16,7 @@
 #include <iostream>
 #include "rtspClient.h"
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -34,7 +35,7 @@ void ByeFromServerClbk()
 
 int main(int argc, char *argv[])
 {
-	string RtspUri("rtsp://127.0.0.1/ansersion");
+	string RtspUri("rtsp://192.168.0.112/stream1");
 	// string RtspUri("rtsp://192.168.81.145/ansersion");
 	RtspClient Client;
 
@@ -57,6 +58,7 @@ int main(int argc, char *argv[])
 	printf("start PLAY\n");
 	printf("SDP: %s\n", Client.GetSDP().c_str());
 
+	sleep (1);
 	/* Send PLAY command to play only 'video' sessions.*/
 	Client.DoPLAY("video");
 
@@ -69,13 +71,23 @@ int main(int argc, char *argv[])
 	const size_t BufSize = 98304;
 	uint8_t buf[BufSize];
 	size_t size = 0;
+	char *start;
+	const char *start_str = "<?xml";
 
 	/* Write h264 video data to file "test_packet_recv.h264" 
 	 * Then it could be played by ffplay */
 	int fd = open("test_packet_recv.h264", O_CREAT | O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR | S_IXUSR);
 
 	while(++packet_num < 1000) {
-		if(!Client.GetMediaData("video", buf, &size, BufSize)) continue;
+		//if(!Client.GetMediaPacket("video", buf, &size)) {
+		if(!Client.GetMediaData("video", buf, &size, BufSize)) {
+			continue;
+		}
+		start = strstr ((char*)buf, start_str);
+		if (start) {
+			printf ("start = %s\n", start);
+		}
+
 		if(write(fd, buf, size) < 0) {
 			perror("write");
 		}
